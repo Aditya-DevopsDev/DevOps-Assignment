@@ -1,0 +1,63 @@
+name: AWS Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - dev
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables based on branch
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "ECR_REPO=prod-backend-repo" >> $GITHUB_ENV
+            echo "ECS_CLUSTER=prod-ecs-cluster" >> $GITHUB_ENV
+            echo "ECS_SERVICE=prod-backend-service" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF##*/}" == "staging" ]]; then
+            echo "ECR_REPO=staging-backend-repo" >> $GITHUB_ENV
+            echo "ECS_CLUSTER=staging-ecs-cluster" >> $GITHUB_ENV
+            echo "ECS_SERVICE=staging-backend-service" >> $GITHUB_ENV
+          else
+            echo "ECR_REPO=dev-backend-repo" >> $GITHUB_ENV
+            echo "ECS_CLUSTER=dev-ecs-cluster" >> $GITHUB_ENV
+            echo "ECS_SERVICE=dev-backend-service" >> $GITHUB_ENV
+          fi
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::692859921713:role/GitHubActionsECSDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG=${GITHUB_SHA}
+          docker build -t $ECR_REPO:$IMAGE_TAG ./backend
+          docker tag $ECR_REPO:$IMAGE_TAG 692859921713.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+          docker push 692859921713.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+          echo "IMAGE_URI=692859921713.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Force ECS Service Deployment
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
