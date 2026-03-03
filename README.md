@@ -1,125 +1,96 @@
-# DevOps Assignment
+# DevOps Assignment (Full-Time Role)
 
-This project consists of a FastAPI backend and a Next.js frontend that communicates with the backend.
+## Overview
 
-## Project Structure
+This project deploys a simple frontend and backend application across two cloud providers:
 
-```
-.
-├── backend/               # FastAPI backend
-│   ├── app/
-│   │   └── main.py       # Main FastAPI application
-│   └── requirements.txt    # Python dependencies
-└── frontend/              # Next.js frontend
-    ├── pages/
-    │   └── index.js     # Main page
-    ├── public/            # Static files
-    └── package.json       # Node.js dependencies
-```
+- Amazon Web Services (AWS)
+- Google Cloud Platform (GCP)
 
-## Prerequisites
+The focus of this assignment is infrastructure design, scalability, availability, and operational thinking.
 
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
+---
 
-## Backend Setup
+# Cloud Deployments
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+## AWS (Production)
 
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-   ```
+Region: ap-south-1  
+Compute: ECS Fargate  
+Load Balancer: Application Load Balancer (ALB)  
+Container Registry: Amazon ECR  
+Infrastructure as Code: Terraform (S3 remote state + DynamoDB locking)
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+Backend URL:
+http://prod-app-alb-366273241.ap-south-1.elb.amazonaws.com
 
-4. Run the FastAPI server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
+Health Check:
+http://prod-app-alb-366273241.ap-south-1.elb.amazonaws.com/api/health
 
-   The backend will be available at `http://localhost:8000`
+---
 
-## Frontend Setup
+## GCP (Production)
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+Region: asia-south1  
+Compute: Cloud Run  
+Container Registry: Artifact Registry  
+Infrastructure as Code: Terraform
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn
-   ```
+Backend URL:
+https://prod-backend-service-5c2dubkgnq-el.a.run.app
 
-3. Configure the backend URL (if different from default):
-   - Open `.env.local`
-   - Update `NEXT_PUBLIC_API_URL` with your backend URL
-   - Example: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
+Health Check:
+https://prod-backend-service-5c2dubkgnq-el.a.run.app/api/health
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+---
 
-   The frontend will be available at `http://localhost:3000`
+# Environment Separation
 
-## Changing the Backend URL
+Each cloud includes:
 
-To change the backend URL that the frontend connects to:
+- dev
+- staging
+- prod
 
-1. Open the `.env.local` file in the frontend directory
-2. Update the `NEXT_PUBLIC_API_URL` variable with your new backend URL
-3. Save the file
-4. Restart the Next.js development server for changes to take effect
+Differences include scaling configuration and resource allocation.
 
-Example:
-```
-NEXT_PUBLIC_API_URL=https://your-new-backend-url.com
-```
+---
 
-## For deployment:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+# Running Locally
 
-   AND
+## Backend
 
-   ```bash
-   npm run start
-   # or
-   yarn start
-   ```
+cd backend  
+pip install -r requirements.txt  
+uvicorn main:app --host 0.0.0.0 --port 3000  
 
-   The frontend will be available at `http://localhost:3000`
+Access:  
+http://localhost:3000/api/health
 
-## Testing the Integration
+---
 
-1. Ensure both backend and frontend servers are running
-2. Open the frontend in your browser (default: http://localhost:3000)
-3. If everything is working correctly, you should see:
-   - A status message indicating the backend is connected
-   - The message from the backend: "You've successfully integrated the backend!"
-   - The current backend URL being used
+## Frontend
 
-## API Endpoints
+cd frontend  
+npm install  
+npm start  
 
-- `GET /api/health`: Health check endpoint
-  - Returns: `{"status": "healthy", "message": "Backend is running successfully"}`
+---
 
-- `GET /api/message`: Get the integration message
-  - Returns: `{"message": "You've successfully integrated the backend!"}`
+# Documentation & Demo
+
+Architecture Documentation:
+(Add Google Docs link here)
+
+Demo Video:
+(Add video link here)
+
+---
+
+# Notes
+
+Infrastructure is fully provisioned using Terraform.
+
+AWS uses remote state with S3 and DynamoDB locking.
+
+Design decisions, scaling strategy, failure handling, and future growth considerations are documented separately.
