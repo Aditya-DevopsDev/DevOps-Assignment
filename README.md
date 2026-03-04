@@ -1,96 +1,77 @@
-# DevOps Assignment (Full-Time Role)
+# DevOps Assignment – Multi-Cloud Deployment (AWS + GCP)
 
-## Overview
+This project demonstrates a multi-cloud DevOps architecture where a simple full-stack application is deployed on **both AWS and Google Cloud Platform**.
 
-This project deploys a simple frontend and backend application across two cloud providers:
+The application consists of:
 
-- Amazon Web Services (AWS)
-- Google Cloud Platform (GCP)
-
-The focus of this assignment is infrastructure design, scalability, availability, and operational thinking.
-
----
-
-# Cloud Deployments
-
-## AWS (Production)
-
-Region: ap-south-1  
-Compute: ECS Fargate  
-Load Balancer: Application Load Balancer (ALB)  
-Container Registry: Amazon ECR  
-Infrastructure as Code: Terraform (S3 remote state + DynamoDB locking)
-
-Backend URL:
-http://prod-app-alb-366273241.ap-south-1.elb.amazonaws.com
-
-Health Check:
-http://prod-app-alb-366273241.ap-south-1.elb.amazonaws.com/api/health
+- **Frontend:** Next.js
+- **Backend:** FastAPI
+- **Infrastructure:** Terraform
+- **Containerization:** Docker
+- **Deployment Platforms:** AWS and GCP
 
 ---
 
-## GCP (Production)
+# Architecture Overview
 
-Region: asia-south1  
-Compute: Cloud Run  
-Container Registry: Artifact Registry  
-Infrastructure as Code: Terraform
+The application is deployed across two cloud providers:
 
-Backend URL:
+## Google Cloud Platform
+
+Frontend
+- Hosted on **Cloud Run**
+
+Backend
+- Docker container deployed to **Cloud Run**
+
+Container Registry
+- **Artifact Registry**
+
+Infrastructure
+- **Terraform**
+
+Region
+- `asia-south1`
+
+---
+
+## Amazon Web Services
+
+Frontend
+- Hosted using **S3 Static Website Hosting**
+
+Backend
+- Docker container running on **ECS Fargate**
+
+Load Balancer
+- **Application Load Balancer (ALB)**
+
+Container Registry
+- **Elastic Container Registry (ECR)**
+
+Infrastructure
+- **Terraform**
+
+Region
+- `ap-south-1`
+
+---
+
+# Hosted Application URLs
+
+## Google Cloud Platform (GCP)
+
+Frontend  
+https://frontend-service-928600051964.asia-south1.run.app
+
+Backend  
 https://prod-backend-service-5c2dubkgnq-el.a.run.app
 
-Health Check:
-https://prod-backend-service-5c2dubkgnq-el.a.run.app/api/health
 
----
+## Amazon Web Services (AWS)
 
-# Environment Separation
+Frontend  
+http://devops-assignment-frontend-aditya.s3-website-ap-south-1.amazonaws.com
 
-Each cloud includes:
-
-- dev
-- staging
-- prod
-
-Differences include scaling configuration and resource allocation.
-
----
-
-# Running Locally
-
-## Backend
-
-cd backend  
-pip install -r requirements.txt  
-uvicorn main:app --host 0.0.0.0 --port 3000  
-
-Access:  
-http://localhost:3000/api/health
-
----
-
-## Frontend
-
-cd frontend  
-npm install  
-npm start  
-
----
-
-# Documentation & Demo
-
-Architecture Documentation:
-(Add Google Docs link here)
-
-Demo Video:
-(Add video link here)
-
----
-
-# Notes
-
-Infrastructure is fully provisioned using Terraform.
-
-AWS uses remote state with S3 and DynamoDB locking.
-
-Design decisions, scaling strategy, failure handling, and future growth considerations are documented separately.
+Backend  
+http://prod-app-alb-366273241.ap-south-1.elb.amazonaws.com
